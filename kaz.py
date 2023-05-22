@@ -22,6 +22,7 @@ for agent in env.agent_iter():
     clock.tick(env.metadata["render_fps"])
 
     observation, reward, termination, truncation, info = env.last()
+    print(observation)
    
     action = env.action_space(agent).sample()
 
