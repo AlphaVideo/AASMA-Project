@@ -1,5 +1,6 @@
 import pygame
 import knights_archers_zombies
+import greedy
 
 env = knights_archers_zombies.env(render_mode="human",
     spawn_rate=20,
@@ -22,8 +23,11 @@ for agent in env.agent_iter():
     clock.tick(env.metadata["render_fps"])
 
     observation, reward, termination, truncation, info = env.last()
-   
-    action = env.action_space(agent).sample()
+    
+    greedyPolicy = greedy.GreedyPolicy(env)
+
+    #action = env.action_space(agent).sample()
+    action = greedyPolicy(observation,agent) #!!! -> esta linha + ficheiro greedy
 
     if termination:
         env.step(None)
