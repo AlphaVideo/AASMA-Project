@@ -3,8 +3,8 @@ import os
 import numpy as np
 import pygame
 
-from pettingzoo.butterfly.knights_archers_zombies.src import constants as const
-from pettingzoo.butterfly.knights_archers_zombies.src.img import get_image
+from src import constants as const
+from src.img import get_image
 
 
 class Zombie(pygame.sprite.Sprite):
