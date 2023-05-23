@@ -6,6 +6,8 @@ rotate right = 3
 weapon = 4
 """
 
+import numpy as np
+
 class GreedyPolicy:
     def __init__(self, env):
         self.env = env
@@ -30,6 +32,10 @@ class GreedyPolicy:
                 closest = z
         
         return closest
+    
+    def unit_vector(self, vector):
+        """ Returns the unit vector of the vector.  """
+        return vector / np.linalg.norm(vector)
 
     def archerAction(self,position,closest):
 
@@ -38,6 +44,11 @@ class GreedyPolicy:
 
         archer_x = position[3]
         archer_y = position[4]
+
+        archer_direction_v = np.array([archer_x, archer_y])
+        zombie_relational_v = np.array([zombie_x, zombie_y])
+        zombie_relational_v = self.unit_vector(zombie_relational_v)
+
 
         #print("zombie")
         #print([zombie_x,zombie_y])
@@ -58,17 +69,17 @@ class GreedyPolicy:
         # if(archer_x > 0 and archer_y > 0):
         #     print("right down")
         
-        print("\n")
-        print("zombie_x - archer_x")
-        print(zombie_x - archer_x)
-        print("zombie_y - archer_y")
-        print(zombie_y - archer_y)
+        # print("\n")
+        # print("zombie_x - archer_x")
+        # print(zombie_x - archer_x)
+        # print("zombie_y - archer_y")
+        # print(zombie_y - archer_y)
         
+        
+        # if archer is facing zombie, then the vectors are colinear
+        # go by angle since relational vector (closest) isn't normalized
+        if np.arccos(np.clip(np.dot(archer_direction_v, zombie_relational_v), -1.0, 1.0)) < np.pi/32 and np.arccos(np.clip(np.dot(archer_direction_v, zombie_relational_v), -1.0, 1.0)) < np.pi/32:
 
-        # if archer is facing zombie, then the vectors are symetric
-        # used 0.4 because rotation not perfect, was a bit random
-        if abs(zombie_x - archer_x) < 0.3 and abs(zombie_y - archer_y) < 0.3:
-            print("ATTACK")
             # attack
             return 4
         
