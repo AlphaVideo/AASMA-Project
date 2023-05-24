@@ -4,8 +4,8 @@ import greedy
 
 env = knights_archers_zombies.env(render_mode="human",
     spawn_rate=20,
-    num_archers=1,
-    num_knights=1,
+    num_archers=3,
+    num_knights=3,
     max_zombies=10, 
     max_arrows=10,
     killable_knights=True,

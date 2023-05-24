@@ -6,7 +6,7 @@ SCREEN_UNITS = 15
 
 # zombie speeds
 ZOMBIE_Y_SPEED = 5
-ZOMBIE_Y_SPEED = ZOMBIE_Y_SPEED * 15.0 / FPS
+ZOMBIE_Y_SPEED = ZOMBIE_Y_SPEED * 15.0 // FPS
 if ZOMBIE_Y_SPEED % 1.0 != 0.0:
     raise ValueError(
         f"FPS of {FPS} leads to decimal place value of {ZOMBIE_Y_SPEED} for zombie_y_speed."
@@ -22,7 +22,7 @@ if ZOMBIE_X_SPEED % 1.0 != 0.0:
 ZOMBIE_X_SPEED = int(ZOMBIE_X_SPEED)
 
 # player rotation rate
-PLAYER_ANG_RATE = 10
+PLAYER_ANG_RATE = 20
 PLAYER_ANG_RATE = PLAYER_ANG_RATE * 15.0 / FPS
 if PLAYER_ANG_RATE % 1.0 != 0.0:
     raise ValueError(

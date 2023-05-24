@@ -178,6 +178,8 @@ knights_archers_zombies_v10.env(
 import os
 import sys
 from itertools import repeat
+import time
+
 
 import gymnasium
 import numpy as np
@@ -199,7 +201,6 @@ from src.zombie import Zombie
 
 sys.dont_write_bytecode = True
 
-
 __all__ = ["ManualPolicy", "env", "parallel_env", "raw_env"]
 
 
@@ -214,6 +215,7 @@ parallel_env = parallel_wrapper_fn(env)
 
 
 class raw_env(AECEnv, EzPickle):
+
     metadata = {
         "render_modes": ["human", "rgb_array"],
         "name": "knights_archers_zombies_v10",
@@ -256,6 +258,10 @@ class raw_env(AECEnv, EzPickle):
             sequence_space=sequence_space,
             render_mode=render_mode,
         )
+        self.archer_kills = 0
+        self.knight_kills = 0
+        self.archers_killed = 0
+        self.knights_killed = 0
         # variable state space
         self.sequence_space = sequence_space
         if self.sequence_space:
@@ -362,6 +368,7 @@ class raw_env(AECEnv, EzPickle):
 
         # Initializing Pygame
         pygame.init()
+        self.start = time.time()
         # self.WINDOW = pygame.display.set_mode([self.WIDTH, self.HEIGHT])
         self.WINDOW = pygame.Surface((const.SCREEN_WIDTH, const.SCREEN_HEIGHT))
         pygame.display.set_caption("Knights, Archers, Zombies")
@@ -454,6 +461,7 @@ class raw_env(AECEnv, EzPickle):
                     self.kill_list.append(knight.agent_name)
 
                 self.knight_list.remove(knight)
+                self.knights_killed += 1
 
     # Zombie Kills the Archer
     def zombie_hit_archer(self):
@@ -467,6 +475,7 @@ class raw_env(AECEnv, EzPickle):
                 self.archer_list.remove(archer)
                 if archer.agent_name not in self.kill_list:
                     self.kill_list.append(archer.agent_name)
+                self.archers_killed += 1
 
     # Zombie Kills the Sword
     def sword_hit(self):
@@ -479,6 +488,7 @@ class raw_env(AECEnv, EzPickle):
                 for zombie in zombie_sword_list:
                     self.zombie_list.remove(zombie)
                     sword.knight.score += 1
+                    self.knight_kills += 1
 
     # Zombie Kills the Arrow
     def arrow_hit(self):
@@ -494,6 +504,7 @@ class raw_env(AECEnv, EzPickle):
                         agent.weapons.remove(arrow)
                         self.zombie_list.remove(zombie)
                         arrow.archer.score += 1
+                        self.archer_kills +=1
 
     # Zombie reaches the End of the Screen
     def zombie_endscreen(self, run, zombie_list):
@@ -840,6 +851,20 @@ class raw_env(AECEnv, EzPickle):
 
         # Zombie Kills all Players
         self.run = self.zombie_all_players(self.run, self.knight_list, self.archer_list)
+
+        if self.run == False:
+            print("Archer Kills:", self.archer_kills)
+            print("Knight Kills:", self.knight_kills)
+            self.end = time.time()
+            print("Time Elapsed:", (self.end - self.start) // 1)
+
+            print("Knights Killed:", self.knights_killed)
+            print("Archers Killed:", self.archers_killed)
+
+
+            
+
+
 
     def reinit(self):
         # Dictionaries for holding new players and their weapons
