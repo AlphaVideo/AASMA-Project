@@ -36,55 +36,24 @@ class GreedyPolicy:
     def unit_vector(self, vector):
         """ Returns the unit vector of the vector.  """
         return vector / np.linalg.norm(vector)
+    
+    def is_close(self, v1, v2):
+        return abs(v1[0] - v2[0]) < 0.05 and abs(v1[1] - v2[1]) < 0.05
 
     def archerAction(self,position,closest):
 
-        zombie_x = closest[1]
-        zombie_y = closest[2]
-
-        archer_x = position[3]
-        archer_y = position[4]
-
-        archer_direction_v = np.array([archer_x, archer_y])
-        zombie_relational_v = np.array([zombie_x, zombie_y])
-        zombie_relational_v = self.unit_vector(zombie_relational_v)
-
-
-        #print("zombie")
-        #print([zombie_x,zombie_y])
-        # if(archer_x == 0 and archer_y>0):
-        #     print("DOWN")
-        # if(archer_x == 0 and archer_y<0):
-        #     print("UP")
-        # if(archer_x > 0 and archer_y == 0):
-        #     print("RIGHT")
-        # if(archer_x < 0 and archer_y == 0):
-        #     print("LEFT ")
-        # if(archer_x<0 and archer_y <0):
-        #     print("left up")
-        # if(archer_x<0 and archer_y > 0):
-        #     print("left down")
-        # if(archer_x > 0 and archer_y < 0):
-        #     print("right up")
-        # if(archer_x > 0 and archer_y > 0):
-        #     print("right down")
-        
-        # print("\n")
-        # print("zombie_x - archer_x")
-        # print(zombie_x - archer_x)
-        # print("zombie_y - archer_y")
-        # print(zombie_y - archer_y)
+        archer_direction_v = self.unit_vector(np.array([position[3], position[4]]))
+        zombie_relational_v = self.unit_vector(np.array([closest[1], closest[2]]))
         
         
         # if archer is facing zombie, then the vectors are colinear
         # go by angle since relational vector (closest) isn't normalized
-        if np.arccos(np.clip(np.dot(archer_direction_v, zombie_relational_v), -1.0, 1.0)) < np.pi/32 and np.arccos(np.clip(np.dot(archer_direction_v, zombie_relational_v), -1.0, 1.0)) < np.pi/32:
-
+        if(self.is_close(archer_direction_v,zombie_relational_v)):
             # attack
             return 4
         
         #zombie a direita ACHO EU
-        elif zombie_x > 0:
+        elif zombie_relational_v[0] > archer_direction_v[0]:
             #rotate right
             return 3
         
