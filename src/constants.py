@@ -1,5 +1,5 @@
 # video options
-FPS = 25
+FPS = 15
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 SCREEN_UNITS = 15

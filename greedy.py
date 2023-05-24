@@ -38,7 +38,7 @@ class GreedyPolicy:
         return vector / np.linalg.norm(vector)
     
     def is_close(self, v1, v2):
-        return abs(v1[0] - v2[0]) < 0.05 and abs(v1[1] - v2[1]) < 0.05
+        return abs(v1[0] - v2[0]) < 0.1 and abs(v1[1] - v2[1]) < 0.1
 
     def archerAction(self,position,closest):
 
@@ -62,12 +62,6 @@ class GreedyPolicy:
             #rotate left
             return 2
         
-        
-        # if abs(closest[1]-position[3]) < 0.4 and abs(closest[2]-position[4]) < 0.4:
-        #     return 4
-        # elif(closest[2]>position[1]):
-        #     return 3
-        # else: return 2
     
     def knightAction(self,position, closest):
         #if inside radius, attack
@@ -78,8 +72,10 @@ class GreedyPolicy:
 
     def __call__(self, observation, agent):
 
+        # [ AbsDist  RelX  RelY  rotX  rotY ]
         closest = self.closestZombie(observation)
 
+        # [ 0  x  y  rotX  rotY ]
         position = observation[0]
 
         if not closest.any():
