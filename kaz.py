@@ -31,7 +31,7 @@ for agent in env.agent_iter():
     #action = env.action_space(agent).sample()
     action = greedyPolicy(observation,agent) #!!! -> esta linha + ficheiro greedy
 
-    if termination:
+    if termination or truncation:
         env.step(None)
     else:
         env.step(action)

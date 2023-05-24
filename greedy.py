@@ -33,7 +33,6 @@ class GreedyPolicy:
             dist = z[0]
             if dist<closest[0] and dist!=0:
                 closest = z
-        
         return closest
     
     def unit_vector(self, vector):
@@ -66,12 +65,28 @@ class GreedyPolicy:
             return 2
         
     
-    def knightAction(self,position, closest):
+    def knightAction(self, position, closest):
+
+
+        knight_direction_v = self.unit_vector(np.array([position[3], position[4]]))
+        zombie_relational_v = self.unit_vector(np.array([closest[1], closest[2]]))
+        signed_angle = math.atan2(knight_direction_v[1], knight_direction_v[0]) - math.atan2(zombie_relational_v[1], zombie_relational_v[0])
+
         #if inside radius, attack
-        if closest[0] < 0.1 :
+        if closest[0] < 0.05:
             return 4
-        #get closer
-        return 5
+        elif (self.is_close(knight_direction_v, zombie_relational_v)):
+            #get closer
+            return 0
+        #Neg. Angle => closest rotation to 0 is clockwise
+        elif signed_angle < 0:
+            #rotate right
+            return 3
+        #Pos. Angle => closest rotation to 0 is anti-clockwise
+        else:
+            #rotate left
+            return 2
+
 
     def __call__(self, observation, agent):
 
@@ -85,7 +100,7 @@ class GreedyPolicy:
             action = 5
         elif ("archer" in agent):
            action = self.archerAction(position,closest)
-        else:
+        elif ("knight" in agent):
            action = self.knightAction(position,closest)
     
 
