@@ -7,6 +7,7 @@ weapon = 4
 """
 
 import numpy as np
+import math
 
 from src import constants as const
 
@@ -40,26 +41,26 @@ class GreedyPolicy:
         return vector / np.linalg.norm(vector)
     
     def is_close(self, v1, v2):
-        return abs(v1[0] - v2[0]) < 0.1 and abs(v1[1] - v2[1]) < 0.1
+        #Attempt to hit target by a margin
+        return abs(v1[0] - v2[0]) <= const.ANGLE_MARGIN and abs(v1[1] - v2[1]) <= const.ANGLE_MARGIN
 
     def archerAction(self,position,closest):
 
         archer_direction_v = self.unit_vector(np.array([position[3], position[4]]))
         zombie_relational_v = self.unit_vector(np.array([closest[1], closest[2]]))
+        signed_angle = math.atan2(archer_direction_v[1], archer_direction_v[0]) - math.atan2(zombie_relational_v[1], zombie_relational_v[0])
         
-        
-        # if archer is facing zombie, then the vectors are colinear
-        # go by angle since relational vector (closest) isn't normalized
+        # If Archer is facing Zombie, then the vectors are colinear
         if(self.is_close(archer_direction_v,zombie_relational_v)):
             # attack
             return 4
         
-        #zombie a direita ACHO EU
-        elif zombie_relational_v[0] > archer_direction_v[0]:
+        #Neg. Angle => closest rotation to 0 is clockwise
+        elif signed_angle < 0:
             #rotate right
             return 3
         
-        #zombie a esquerda ACHO EU
+        #Pos. Angle => closest rotation to 0 is anti-clockwise
         else:
             #rotate left
             return 2
