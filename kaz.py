@@ -2,17 +2,19 @@ import pygame
 import knights_archers_zombies
 import greedy
 
+from src import constants as const
+
 env = knights_archers_zombies.env(render_mode="human",
-    spawn_rate=20,
-    num_archers=1,
-    num_knights=1,
-    max_zombies=10, 
-    max_arrows=10,
+    spawn_rate=const.SPAWN_RATE,
+    num_archers=const.NUM_ARCHERS,
+    num_knights=const.NUM_KNIGHTS,
+    max_zombies=const.MAX_ZOMBIES, 
+    max_arrows=const.MAX_ARROWS,
     killable_knights=True,
     killable_archers=True,
     pad_observation=False,
     line_death=False,
-    max_cycles=900,
+    max_cycles=const.MAX_CYCLES,
     vector_state=True,
     use_typemasks=False)
 env.reset()

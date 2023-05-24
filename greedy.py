@@ -8,6 +8,8 @@ weapon = 4
 
 import numpy as np
 
+from src import constants as const
+
 class GreedyPolicy:
     def __init__(self, env):
         self.env = env
@@ -15,9 +17,9 @@ class GreedyPolicy:
         #self.agent = self.env.agents[self.agent_id]
 
         #!!!
-        self.num_archers=1
-        self.num_knights=1
-        self.max_arrows = 10
+        self.num_archers=const.NUM_ARCHERS
+        self.num_knights=const.NUM_KNIGHTS
+        self.max_arrows =const.MAX_ARROWS
 
     def closestZombie(self,observation):
         #zombies info
