@@ -47,19 +47,21 @@ class GreedyPolicy:
 
         archer_direction_v = self.unit_vector(np.array([position[3], position[4]]))
         zombie_relational_v = self.unit_vector(np.array([closest[1], closest[2]]))
-        signed_angle = math.atan2(archer_direction_v[1], archer_direction_v[0]) - math.atan2(zombie_relational_v[1], zombie_relational_v[0])
+
+        #Closest rotation is given by the sign of the determinant of the matrix given by the vectors [u, v]
+        vector_mat_det = archer_direction_v[0]*zombie_relational_v[1] - archer_direction_v[1]*zombie_relational_v[0]
         
         # If Archer is facing Zombie, then the vectors are colinear
         if(self.is_close(archer_direction_v,zombie_relational_v)):
             # attack
             return 4
         
-        #Neg. Angle => closest rotation to 0 is clockwise
-        elif signed_angle < 0:
+        #Pos. Determinant => closest rotation to colinear is clockwise
+        elif vector_mat_det > 0:
             #rotate right
             return 3
         
-        #Pos. Angle => closest rotation to 0 is anti-clockwise
+        #Neg. Determinant => closest rotation to colinear is anti-clockwise
         else:
             #rotate left
             return 2
@@ -70,7 +72,8 @@ class GreedyPolicy:
 
         knight_direction_v = self.unit_vector(np.array([position[3], position[4]]))
         zombie_relational_v = self.unit_vector(np.array([closest[1], closest[2]]))
-        signed_angle = math.atan2(knight_direction_v[1], knight_direction_v[0]) - math.atan2(zombie_relational_v[1], zombie_relational_v[0])
+
+        vector_mat_det = knight_direction_v[0]*zombie_relational_v[1] - knight_direction_v[1]*zombie_relational_v[0]
 
         #if inside radius, attack
         if closest[0] < 0.05:
@@ -78,11 +81,11 @@ class GreedyPolicy:
         elif (self.is_close(knight_direction_v, zombie_relational_v)):
             #get closer
             return 0
-        #Neg. Angle => closest rotation to 0 is clockwise
-        elif signed_angle < 0:
+        #Pos. Determinant => closest rotation to colinear is clockwise
+        elif vector_mat_det > 0:
             #rotate right
             return 3
-        #Pos. Angle => closest rotation to 0 is anti-clockwise
+        #Neg. Determinant => closest rotation to colinear is anti-clockwise
         else:
             #rotate left
             return 2
