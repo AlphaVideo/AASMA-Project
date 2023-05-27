@@ -76,7 +76,7 @@ class GreedyPolicy:
         vector_mat_det = knight_direction_v[0]*zombie_relational_v[1] - knight_direction_v[1]*zombie_relational_v[0]
 
         #if inside radius, attack
-        if closest[0] < 0.05:
+        if closest[0] < const.KNIGHT_ATTACK_RADIUS:
             return 4
         elif (self.is_close(knight_direction_v, zombie_relational_v)):
             #get closer
