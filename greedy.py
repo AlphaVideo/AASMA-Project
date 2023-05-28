@@ -72,11 +72,15 @@ class GreedyPolicy:
         archer_direction_v = self.unit_vector(np.array([position[3], position[4]]))
         zombie_relational_v = self.unit_vector(np.array([closest[1], closest[2]]))
 
+        #Archer has better accuracy if he aims for a zombie position slightly lower than current position:
+        #Lower y on game screen => > y_value
+        projected_zombie_v = self.unit_vector(np.array([zombie_relational_v[0], zombie_relational_v[1]+0.3]))
+
         #Closest rotation is given by the sign of the determinant of the matrix given by the vectors [u, v]
-        vector_mat_det = archer_direction_v[0]*zombie_relational_v[1] - archer_direction_v[1]*zombie_relational_v[0]
+        vector_mat_det = archer_direction_v[0]*projected_zombie_v[1] - archer_direction_v[1]*projected_zombie_v[0]
         
         # If Archer is facing Zombie, then the vectors are colinear
-        if(self.vectors_near_collinear(archer_direction_v,zombie_relational_v)):
+        if(self.vectors_near_collinear(archer_direction_v,projected_zombie_v)):
             # attack
             return 4
         
