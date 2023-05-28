@@ -23,8 +23,8 @@ class GreedyPolicy:
         self.max_arrows =const.MAX_ARROWS
 
     def closestZombie(self,observation):
-        #zombies info
-        zombies_id = 1 + self.num_knights + 2*self.num_archers + self.max_arrows 
+        #Zombie lines are found after current_agent + archers + knights + swords + arrows
+        zombies_id = 1 + 2*self.num_knights + self.num_archers + self.max_arrows 
         zombies = observation[zombies_id:]
 
         #find closest zombie
@@ -34,6 +34,30 @@ class GreedyPolicy:
             if dist<closest[0] and dist!=0:
                 closest = z
         return closest
+    
+    def zombieNearBottom(self, observation):
+        zombies_id = 1 + 2*self.num_knights + self.num_archers + self.max_arrows 
+        zombies = observation[zombies_id:]
+
+        """
+        Positions are relative: 
+        Closest zombie to archer => higher value of y 
+        Zombies before archer on y axis will have value < 0
+        Zombies past archer on y axis will have value > 0 
+        """
+
+        closestToBottom = zombies[0] #First zombie
+        max_y = zombies[0][2] #Y of first zombie
+
+        for z in zombies:
+            #z[4] => angle of entity with the "world"
+            #This value is 1 when the entity is alive, 0 when dead/not in use
+            if z[4] == 1:
+                if z[2] > max_y:
+                    max_y = z[2]
+                    closestToBottom = z
+            
+        return closestToBottom
     
     def unit_vector(self, vector):
         """ Returns the unit vector of the vector.  """
@@ -94,19 +118,26 @@ class GreedyPolicy:
     def __call__(self, observation, agent):
 
         # [ AbsDist  RelX  RelY  rotX  rotY ]
-        closest = self.closestZombie(observation)
 
         # [ 0  x  y  rotX  rotY ]
         position = observation[0]
 
-        if not closest.any():
-            action = 5
-        elif ("archer" in agent):
-           action = self.archerAction(position,closest)
-        elif ("knight" in agent):
-           action = self.knightAction(position,closest)
-    
+        if ("archer" in agent):
+            # [ AbsDist  RelX  RelY  rotX  rotY ]
+            target = self.zombieNearBottom(observation)
+            if not target.any():
+                action = 5
+            else:
+                action = self.archerAction(position,target)
 
+        elif ("knight" in agent):
+            # [ AbsDist  RelX  RelY  rotX  rotY ]
+            closest = self.closestZombie(observation)
+            if not closest.any():
+                action = 5
+            else:
+                action = self.knightAction(position,closest)
+    
         return action
 
     
