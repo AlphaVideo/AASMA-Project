@@ -41,7 +41,7 @@ class GreedyPolicy:
 
         """
         Positions are relative: 
-        Closest zombie to archer => higher value of y 
+        The closer the zombie to archer => the higher the value of y 
         Zombies before archer on y axis will have value < 0
         Zombies past archer on y axis will have value > 0 
         """
@@ -67,20 +67,29 @@ class GreedyPolicy:
         #True if vectors are within a margin
         return abs(v1[0] - v2[0]) <= const.ANGLE_MARGIN and abs(v1[1] - v2[1]) <= const.ANGLE_MARGIN
 
-    def archerAction(self,position,closest):
+    def archerAction(self,position, target):
 
         archer_direction_v = self.unit_vector(np.array([position[3], position[4]]))
-        zombie_relational_v = self.unit_vector(np.array([closest[1], closest[2]]))
+        zombie_relational_v = self.unit_vector(np.array([target[1], target[2]]))
 
-        #Archer has better accuracy if he aims for a zombie position slightly lower than current position:
+        #Archer can have better accuracy if he aims for a zombie position slightly lower than current position:
         #Lower y on game screen => > y_value
-        projected_zombie_v = self.unit_vector(np.array([zombie_relational_v[0], zombie_relational_v[1]+0.3]))
+        projected_zombie_v = self.unit_vector(np.array([zombie_relational_v[0], zombie_relational_v[1]+const.ARCHER_TARGET_OFFSET]))
+
+        #The nearer the zombie is to the archer, the safer it is to use non-projected direction
+        chosen_vector = None
+        if target[2] >= const.ARCHER_TARGET_CLOSE:
+            # Case where zombie is close => original direction
+            chosen_vector = zombie_relational_v
+        else:
+            # Case where zombie is far => projected direction
+            chosen_vector = projected_zombie_v
 
         #Closest rotation is given by the sign of the determinant of the matrix given by the vectors [u, v]
-        vector_mat_det = archer_direction_v[0]*projected_zombie_v[1] - archer_direction_v[1]*projected_zombie_v[0]
+        vector_mat_det = archer_direction_v[0]*chosen_vector[1] - archer_direction_v[1]*chosen_vector[0]
         
         # If Archer is facing Zombie, then the vectors are colinear
-        if(self.vectors_near_collinear(archer_direction_v,projected_zombie_v)):
+        if(self.vectors_near_collinear(archer_direction_v, chosen_vector)):
             # attack
             return 4
         
@@ -132,7 +141,7 @@ class GreedyPolicy:
             if not target.any():
                 action = 5
             else:
-                action = self.archerAction(position,target)
+                action = self.archerAction(position, target)
 
         elif ("knight" in agent):
             # [ AbsDist  RelX  RelY  rotX  rotY ]
@@ -140,7 +149,7 @@ class GreedyPolicy:
             if not closest.any():
                 action = 5
             else:
-                action = self.knightAction(position,closest)
+                action = self.knightAction(position, closest)
     
         return action
 
