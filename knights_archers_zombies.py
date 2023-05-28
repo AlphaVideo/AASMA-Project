@@ -687,6 +687,18 @@ class raw_env(AECEnv, EzPickle):
         )
 
         return np.stack(state, axis=0)
+    
+    def game_over(self, cause):
+        # Game Over stats
+        print("Archer Kills:", self.archer_kills)
+        print("Knight Kills:", self.knight_kills)
+        self.end = time.time()
+        print("Time Elapsed:", (self.end - self.start) // 1)
+
+        print("Dead Archers:", self.archers_killed)
+        print("Dead Knights:", self.knights_killed)
+        print("Cause of game end:", cause)
+
 
     def step(self, action):
         # check if the particular agent is done
@@ -753,12 +765,17 @@ class raw_env(AECEnv, EzPickle):
             self.draw()
 
             self.check_game_end()
+            
             self.frames += 1
-
+            if self.run == False: 
+                self.game_over("The game was lost")
         terminate = not self.run
         truncate = self.frames >= self.max_cycles
         self.terminations = {a: terminate for a in self.agents}
         self.truncations = {a: truncate for a in self.agents}
+
+        if truncate:
+            self.game_over("The game was won")
 
         # manage the kill list
         if self._agent_selector.is_last():
@@ -851,21 +868,6 @@ class raw_env(AECEnv, EzPickle):
 
         # Zombie Kills all Players
         self.run = self.zombie_all_players(self.run, self.knight_list, self.archer_list)
-
-        # Game Over stats
-        if self.run == False:
-            print("Archer Kills:", self.archer_kills)
-            print("Knight Kills:", self.knight_kills)
-            self.end = time.time()
-            print("Time Elapsed:", (self.end - self.start) // 1)
-
-            print("Dead Archers:", self.archers_killed)
-            print("Dead Knights:", self.knights_killed)
-
-
-            
-
-
 
     def reinit(self):
         # Dictionaries for holding new players and their weapons
