@@ -63,8 +63,8 @@ class GreedyPolicy:
         """ Returns the unit vector of the vector.  """
         return vector / np.linalg.norm(vector)
     
-    def is_close(self, v1, v2):
-        #Attempt to hit target by a margin
+    def vectors_near_collinear(self, v1, v2):
+        #True if vectors are within a margin
         return abs(v1[0] - v2[0]) <= const.ANGLE_MARGIN and abs(v1[1] - v2[1]) <= const.ANGLE_MARGIN
 
     def archerAction(self,position,closest):
@@ -76,7 +76,7 @@ class GreedyPolicy:
         vector_mat_det = archer_direction_v[0]*zombie_relational_v[1] - archer_direction_v[1]*zombie_relational_v[0]
         
         # If Archer is facing Zombie, then the vectors are colinear
-        if(self.is_close(archer_direction_v,zombie_relational_v)):
+        if(self.vectors_near_collinear(archer_direction_v,zombie_relational_v)):
             # attack
             return 4
         
@@ -102,14 +102,14 @@ class GreedyPolicy:
         #if inside radius, attack
         if closest[0] < const.KNIGHT_ATTACK_RADIUS:
             return 4
-        elif (self.is_close(knight_direction_v, zombie_relational_v)):
+        elif (self.vectors_near_collinear(knight_direction_v, zombie_relational_v)):
             #get closer
             return 0
-        #Pos. Determinant => closest rotation to colinear is clockwise
+        #Pos. Determinant => closest rotation to collinear is clockwise
         elif vector_mat_det > 0:
             #rotate right
             return 3
-        #Neg. Determinant => closest rotation to colinear is anti-clockwise
+        #Neg. Determinant => closest rotation to collinear is anti-clockwise
         else:
             #rotate left
             return 2
