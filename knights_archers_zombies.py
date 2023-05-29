@@ -695,6 +695,8 @@ class raw_env(AECEnv, EzPickle):
         self.end = time.time()
         print("Time Elapsed:", (self.end - self.start) // 1)
 
+        print("Frames: ", self.frames)
+
         print("Dead Archers:", self.archers_killed)
         print("Dead Knights:", self.knights_killed)
         print("Cause of game end:", cause)

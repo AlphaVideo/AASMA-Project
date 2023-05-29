@@ -35,7 +35,7 @@ class GreedyPolicy:
                 closest = z
         return closest
     
-    def zombieNearBottom(self, observation):
+    def zombieNearBottom(self, observation): 
         zombies_id = 1 + 2*self.num_knights + self.num_archers + self.max_arrows 
         zombies = observation[zombies_id:]
 
@@ -52,10 +52,9 @@ class GreedyPolicy:
         for z in zombies:
             #z[4] => angle of entity with the "world"
             #This value is 1 when the entity is alive, 0 when dead/not in use
-            if z[4] == 1:
-                if z[2] > max_y:
-                    max_y = z[2]
-                    closestToBottom = z
+            if z[4] == 1 and z[2] > max_y:
+                max_y = z[2]
+                closestToBottom = z
             
         return closestToBottom
     
