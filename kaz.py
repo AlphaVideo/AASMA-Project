@@ -16,7 +16,8 @@ env = knights_archers_zombies.env(render_mode="human",
     line_death=False,
     max_cycles=const.MAX_CYCLES,
     vector_state=True,
-    use_typemasks=False)
+    use_typemasks=False,
+    terminal_results=True)
 env.reset()
 
 clock = pygame.time.Clock()

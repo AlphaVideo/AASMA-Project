@@ -158,6 +158,7 @@ knights_archers_zombies_v10.env(
 
 `sequence_space`: **experimental**, only relevant when `vector_state=True` is set, removes non-existent entities in the vector state.
 
+`terminal_results`: if true, prints game results in terminal, if false, writes results in file
 
 ### Version History
 
@@ -240,6 +241,7 @@ class raw_env(AECEnv, EzPickle):
         use_typemasks=False,
         sequence_space=False,
         render_mode=None,
+        terminal_results=True,
     ):
         EzPickle.__init__(
             self,
@@ -257,11 +259,13 @@ class raw_env(AECEnv, EzPickle):
             use_typemasks=use_typemasks,
             sequence_space=sequence_space,
             render_mode=render_mode,
+            terminal_results=terminal_results,
         )
         self.archer_kills = 0
         self.knight_kills = 0
         self.archers_killed = 0
         self.knights_killed = 0
+        self.terminal_results = terminal_results
         # variable state space
         self.sequence_space = sequence_space
         if self.sequence_space:
@@ -690,16 +694,22 @@ class raw_env(AECEnv, EzPickle):
     
     def game_over(self, cause):
         # Game Over stats
-        print("Archer Kills:", self.archer_kills)
-        print("Knight Kills:", self.knight_kills)
         self.end = time.time()
-        print("Time Elapsed:", (self.end - self.start) // 1)
+        if self.terminal_results:
+            print("Archer Kills:", self.archer_kills)
+            print("Knight Kills:", self.knight_kills)
+            print("Time Elapsed:", (self.end - self.start) // 1)
+            print("Frames: ", self.frames)
+            print("Dead Archers:", self.archers_killed)
+            print("Dead Knights:", self.knights_killed)
+            print("End Result", cause)
+        else:
+            print("Writting results in output file: results.txt")
+            f = open("results.txt", 'w')
 
-        print("Frames: ", self.frames)
 
-        print("Dead Archers:", self.archers_killed)
-        print("Dead Knights:", self.knights_killed)
-        print("Cause of game end:", cause)
+            
+            f.close()
 
 
     def step(self, action):
@@ -770,14 +780,14 @@ class raw_env(AECEnv, EzPickle):
             
             self.frames += 1
             if self.run == False: 
-                self.game_over("The game was lost")
+                self.game_over("The game was lost!")
         terminate = not self.run
         truncate = self.frames >= self.max_cycles
         self.terminations = {a: terminate for a in self.agents}
         self.truncations = {a: truncate for a in self.agents}
 
         if truncate:
-            self.game_over("The game was won")
+            self.game_over("Players survived max cycles! Victory!")
 
         # manage the kill list
         if self._agent_selector.is_last():
