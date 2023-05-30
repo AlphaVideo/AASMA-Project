@@ -182,6 +182,7 @@ import os
 import sys
 from itertools import repeat
 import time
+import json
 
 
 import gymnasium
@@ -711,9 +712,20 @@ class raw_env(AECEnv, EzPickle):
         else:
             print("Writting results in output file: results.txt")
             f = open(self.output_file, 'a')
-            f.write("new run\n")
 
+            result = {}
+            result["archer_kills"] = self.archer_kills
+            result["knight_kills"] = self.knight_kills
+            result["total_kills"] = self.archer_kills + self.knight_kills
+            result["frames"] = self.frames
+            result["time_elapsed"] = (self.end - self.start) // 1
+            result["dead_archers"] = self.archers_killed
+            result["dead_knights"] = self.knights_killed
+            result["dead_agents"] = self.archers_killed + self.knights_killed
+            result["ending_condition"] = cause
 
+            f.write(json.dumps(result))
+            f.write("\n")
 
             f.close()
 
