@@ -4,8 +4,7 @@ import greedy
 
 from src import constants as const
 
-env = knights_archers_zombies.env(render_mode="human",
-    spawn_rate=const.SPAWN_RATE,
+env = knights_archers_zombies.env(spawn_rate=const.SPAWN_RATE,
     num_archers=const.NUM_ARCHERS,
     num_knights=const.NUM_KNIGHTS,
     max_zombies=const.MAX_ZOMBIES, 
