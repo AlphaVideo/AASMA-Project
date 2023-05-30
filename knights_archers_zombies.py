@@ -160,6 +160,8 @@ knights_archers_zombies_v10.env(
 
 `terminal_results`: if true, prints game results in terminal, if false, writes results in file
 
+`output_file`: chooses where results will be written, if terminal_results=true
+
 ### Version History
 
 * v10: Add vectorizable state space (1.17.0)
@@ -242,6 +244,7 @@ class raw_env(AECEnv, EzPickle):
         sequence_space=False,
         render_mode=None,
         terminal_results=True,
+        output_file="results.txt",
     ):
         EzPickle.__init__(
             self,
@@ -260,12 +263,14 @@ class raw_env(AECEnv, EzPickle):
             sequence_space=sequence_space,
             render_mode=render_mode,
             terminal_results=terminal_results,
+            output_file=output_file,
         )
         self.archer_kills = 0
         self.knight_kills = 0
         self.archers_killed = 0
         self.knights_killed = 0
         self.terminal_results = terminal_results
+        self.output_file = output_file
         # variable state space
         self.sequence_space = sequence_space
         if self.sequence_space:
@@ -705,10 +710,11 @@ class raw_env(AECEnv, EzPickle):
             print("End Result", cause)
         else:
             print("Writting results in output file: results.txt")
-            f = open("results.txt", 'w')
+            f = open(self.output_file, 'a')
+            f.write("new run\n")
 
 
-            
+
             f.close()
 
 
