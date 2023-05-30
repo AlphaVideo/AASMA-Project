@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 from typing import Sequence
 
+import graph_utils
 import knights_archers_zombies
 import greedy
 from src import constants as const
@@ -12,6 +13,7 @@ from src import constants as const
 N_CASES=2
 N_EPISODES=3
 OUTPUT_FILES=["CASE1.txt", "CASE2.txt"]
+COLORS=["green", "blue"]
 
 def run_multi_agent(environment, agents: Sequence, n_episodes: int) -> np.ndarray:
 
@@ -39,7 +41,8 @@ def run_multi_agent(environment, agents: Sequence, n_episodes: int) -> np.ndarra
 
 # Delete result files from previous executions
 for name in OUTPUT_FILES:
-    os.remove(name)
+    if os.path.exists(name):
+        os.remove(name)
 
 # Create an environment for each test case
 # This is so their output goes to different files
@@ -79,8 +82,21 @@ for env in envs:
             else:
                 env.step(action)
 
-# f = open("results.txt", 'r')
+# Results is a dictionary: key=case, value=results being plotted
+results = {}
+for case in OUTPUT_FILES:
+    f = open(case, 'r')
 
-# for line in f.readlines():
-#     result = json.loads(line)
-#     print(result)
+    # Example = plot the frame number they survive
+    all_frames = []
+    for episode in f.readlines():
+        resultJSON = json.loads(episode)
+        all_frames += [resultJSON["frames"]]
+
+    results[case] = all_frames
+
+graph_utils.compare_results(
+    results,
+    title="Comparion between number of frames survived",
+    colors=COLORS
+)
