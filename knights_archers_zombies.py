@@ -710,7 +710,7 @@ class raw_env(AECEnv, EzPickle):
             print("Dead Knights:", self.knights_killed)
             print("End Result", cause)
         else:
-            print("Writting results in output file: results.txt")
+            print("Writting results in output file: " + self.output_file)
             f = open(self.output_file, 'a')
 
             result = {}
@@ -726,7 +726,6 @@ class raw_env(AECEnv, EzPickle):
 
             f.write(json.dumps(result))
             f.write("\n")
-
             f.close()
 
 
@@ -971,6 +970,12 @@ class raw_env(AECEnv, EzPickle):
         self.terminations = dict(zip(self.agents, [False for _ in self.agents]))
         self.truncations = dict(zip(self.agents, [False for _ in self.agents]))
         self.infos = dict(zip(self.agents, [{} for _ in self.agents]))
+        self.archer_kills = 0
+        self.knight_kills = 0
+        self.archers_killed = 0
+        self.knights_killed = 0
+        self.end = 0
+        self.start = time.time()
         self.reinit()
 
 
