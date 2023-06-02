@@ -100,8 +100,7 @@ class GreedyPolicy:
         #Neg. Determinant => closest rotation to colinear is anti-clockwise
         else:
             #rotate left
-            return 2
-        
+            return 2     
     
     def knightAction(self, position, closest):
 
@@ -126,6 +125,67 @@ class GreedyPolicy:
             #rotate left
             return 2
 
+    def agentPriority(self, observation, agent):
+        # priority: archer 1 > ... > archer n > knight 1 > ... > knight m
+
+        #test = -1
+
+        agent_id = int(agent[7:])
+        if "archer" in agent: agent_id += self.num_knights
+
+        #list agents
+        knight_endIndex = 1 + self.num_archers + self.num_knights
+        archer_endIndex = 1 + self.num_archers
+        agents = list(observation[archer_endIndex:knight_endIndex]) + list(observation[1:archer_endIndex])
+        #agents_endIndex = 1 + self.num_archers + self.num_knights
+        #agents = observation[1:agents_endIndex]
+
+        priority = agent_id
+        
+        #check if there are dead agents and ajust priorities
+        for i in range(len(agents)): 
+            if i >= agent_id: 
+                #if(test==1): print("break: i= ",i)
+                break
+            elif not agents[i].any():
+                priority -= 1
+                #test = 1
+                #print("i:",i," agent_id: ", agent_id, "new_priority: ", priority)
+                
+
+        #if test == 1: print(agents,"\n-------------------------------")
+
+        return priority
+
+    def orderFunc(self,z):
+        return z[2]
+
+    def orderZombies(self, observation):
+        #Zombie lines are found after current_agent + archers + knights + swords + arrows
+        zombies_id = 1 + 2*self.num_knights + self.num_archers + self.max_arrows 
+        zombies = observation[zombies_id:]
+
+        # filter dead zombies
+        zombies = list(filter(lambda z: z.any(), zombies))
+
+        # sort them by relative y !!
+        #zombies.sort(key=self.orderFunc)
+
+        # sorte them by absolute y (!! i think)
+        agent_pos = observation[0]
+        zombies.sort(key=lambda z: agent_pos[2] - z[2])
+
+        return zombies
+
+    def socialConventions(self,observation,agent):
+
+        priority = self.agentPriority(observation,agent)
+        orderedZombies = self.orderZombies(observation)
+
+        if priority < len(orderedZombies):
+            return orderedZombies[priority]
+        else:
+            return orderedZombies[-1]
 
     def __call__(self, observation, agent):
 
@@ -140,15 +200,17 @@ class GreedyPolicy:
             if not target.any():
                 action = 5
             else:
+                target = self.socialConventions(observation,agent)
                 action = self.archerAction(position, target)
 
         elif ("knight" in agent):
             # [ AbsDist  RelX  RelY  rotX  rotY ]
-            closest = self.closestZombie(observation)
-            if not closest.any():
+            target = self.closestZombie(observation)
+            if not target.any():
                 action = 5
             else:
-                action = self.knightAction(position, closest)
+                target = self.socialConventions(observation,agent)
+                action = self.knightAction(position, target)
     
         return action
 
