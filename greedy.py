@@ -33,7 +33,11 @@ class GreedyPolicy:
             dist = z[0]
             if dist<closest[0] and dist!=0:
                 closest = z
-        return closest
+
+        if(closest.any()):
+            return closest
+        else:
+            return None
     
     def zombieNearBottom(self, observation): 
         zombies_id = 1 + 2*self.num_knights + self.num_archers + self.max_arrows 
@@ -55,8 +59,11 @@ class GreedyPolicy:
             if z[4] == 1 and z[2] > max_y:
                 max_y = z[2]
                 closestToBottom = z
-            
-        return closestToBottom
+        
+        if(closestToBottom.any()):
+            return closestToBottom  
+        else:
+            return None
     
     def unit_vector(self, vector):
         """ Returns the unit vector of the vector.  """
@@ -187,7 +194,7 @@ class GreedyPolicy:
         # sort them by relative y !!
         #zombies.sort(key=self.orderFunc)
 
-        # sorte them by absolute y (!! i think)
+        # sort them by absolute y (!! i think)
         agent_pos = observation[0]
         zombies.sort(key=lambda z: agent_pos[2] - z[2])
 
@@ -200,33 +207,73 @@ class GreedyPolicy:
 
         if priority < len(orderedZombies):
             return orderedZombies[priority]
-        else:
+        elif len(orderedZombies)>0:
             return orderedZombies[-1]
+        else:
+            return None
+
+    def closestTo(self,zombie,agents,agent_pos):
+        # posicao absoluta do zombie
+        abs_zombie = [agent_pos[1]-zombie[1],agent_pos[2]-zombie[2]]
+
+        # base : proprio agente
+        closest = 0
+        min_dist = math.dist(abs_zombie,[agent_pos[1]-agents[0][1],agent_pos[2]-agents[0][2]])
+
+        for i in range(len(agents)):
+            abs_agent = [agent_pos[1]-agents[i][1],agent_pos[2]-agents[i][2]]
+            dist = math.dist(abs_zombie,abs_agent)
+            if dist <= min_dist:
+                closest = i
+                min_dist = dist
+        
+        return closest
+
+    def roles(self,observation):
+        # 1.olhar para os 4 zombies mais proximos
+        # 2. ver a distancia de cada agente a cada zombie
+        # 3. atribuir role ao mais proximo
+
+        orderedZombies = self.orderZombies(observation)
+        agent_pos = observation[0]
+        agents_endIndex = 1 + self.num_archers + self.num_knights
+        agents = observation[1:agents_endIndex]
+
+        for z in orderedZombies:
+
+            closestAgent = self.closestTo(z,agents,agent_pos)
+
+            if agents[closestAgent][0] == 0: #is itself
+                return z
+            else:
+                agents = np.delete(agents,closestAgent,axis=0)
+
+        return None
 
     def __call__(self, observation, agent):
 
-        # [ AbsDist  RelX  RelY  rotX  rotY ]
+        # observations: [ AbsDist  RelX  RelY  rotX  rotY ]
 
-        # [ 0  x  y  rotX  rotY ]
+        # position: [ 0  x  y  rotX  rotY ]
         position = observation[0]
 
         agent_id = agent[7:]
         if ("archer" in agent):
-            # [ AbsDist  RelX  RelY  rotX  rotY ]
-            target = self.zombieNearBottom(observation)
-            if not target.any():
+            #target = self.zombieNearBottom(observation)
+            #target = self.socialConventions(observation,agent)
+            target = self.roles(observation)
+            if target is None:
                 action = 5
             else:
-                target = self.socialConventions(observation,agent)
                 action = self.archerAction(position, target,agent_id)
 
         elif ("knight" in agent):
-            # [ AbsDist  RelX  RelY  rotX  rotY ]
-            target = self.closestZombie(observation)
-            if not target.any():
+            #target = self.closestZombie(observation)
+            #target = self.socialConventions(observation,agent)
+            target = self.roles(observation)
+            if target is None:
                 action = 5
             else:
-                target = self.socialConventions(observation,agent)
                 orderedZombies = self.orderZombies(observation)
                 action = self.knightAction(position, target, orderedZombies)
     
