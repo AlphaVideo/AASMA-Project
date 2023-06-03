@@ -121,11 +121,11 @@ class GreedyPolicy:
             #rotate left
             return 2     
     
-    def knightAction(self, position, closest, orderedZombies):
+    def knightAction(self, position, target, orderedZombies):
 
 
         knight_direction_v = self.unit_vector(np.array([position[3], position[4]]))
-        zombie_relational_v = self.unit_vector(np.array([closest[1], closest[2]]))
+        zombie_relational_v = self.unit_vector(np.array([target[1], target[2]]))
 
         vector_mat_det = knight_direction_v[0]*zombie_relational_v[1] - knight_direction_v[1]*zombie_relational_v[0]
 
@@ -134,7 +134,7 @@ class GreedyPolicy:
                 return 4
 
         #if inside radius, attack
-        if closest[0] < const.KNIGHT_ATTACK_RADIUS:
+        if target[0] < const.KNIGHT_ATTACK_RADIUS:
             return 4
         elif (self.vectors_near_collinear(knight_direction_v, zombie_relational_v)):
             #get closer
@@ -258,25 +258,30 @@ class GreedyPolicy:
         position = observation[0]
 
         agent_id = agent[7:]
-        if ("archer" in agent):
-            #target = self.zombieNearBottom(observation)
-            #target = self.socialConventions(observation,agent)
+
+        #greedy
+        if const.STRATEGY == 0 and "archer" in agent:
+            target = self.zombieNearBottom(observation)
+        if const.STRATEGY == 0 and "knight" in agent:
+            target = self.closestZombie(observation)
+        #socia conventions
+        elif const.STRATEGY == 1:  
+            target = self.socialConventions(observation,agent)
+        #roles
+        else:
             target = self.roles(observation)
-            if target is None:
-                action = 5
-            else:
-                action = self.archerAction(position, target,agent_id)
+
+        #check if there's a target
+        if target is None: return 5
+
+        #get action
+        if ("archer" in agent):
+            action = self.archerAction(position, target,agent_id)
 
         elif ("knight" in agent):
-            #target = self.closestZombie(observation)
-            #target = self.socialConventions(observation,agent)
-            target = self.roles(observation)
-            if target is None:
-                action = 5
-            else:
-                orderedZombies = self.orderZombies(observation)
-                action = self.knightAction(position, target, orderedZombies)
-    
+            orderedZombies = self.orderZombies(observation)
+            action = self.knightAction(position, target, orderedZombies)
+
         return action
 
     
