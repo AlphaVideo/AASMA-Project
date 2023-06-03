@@ -10,10 +10,10 @@ import knights_archers_zombies
 import greedy
 from src import constants as const
 
-N_CASES=2
+N_CASES=len(const.STRATEGY_LIST)
 N_EPISODES=3
-OUTPUT_FILES=["CASE1.txt", "CASE2.txt"]
-COLORS=["green", "blue"]
+OUTPUT_FILES=[const.STRATEGY_LIST[0]+".txt", const.STRATEGY_LIST[1]+".txt", const.STRATEGY_LIST[2]+".txt"]
+COLORS=["green", "blue", "purple"]
 
 # Delete result files from previous executions
 for name in OUTPUT_FILES:
@@ -24,7 +24,7 @@ for name in OUTPUT_FILES:
 # This is so their output goes to different files
 envs = []
 for i in range(N_CASES):
-    env = knights_archers_zombies.env(
+    env = knights_archers_zombies.env(render_mode="human",
     spawn_rate=const.SPAWN_RATE,
     num_archers=const.NUM_ARCHERS,
     num_knights=const.NUM_KNIGHTS,
@@ -39,8 +39,9 @@ for i in range(N_CASES):
 
 clock = pygame.time.Clock()
 
-for env in envs:
-    for i in  range(N_EPISODES):
+strategy_index = 0
+for env in envs: 
+    for i in range(N_EPISODES):
         # Reset environment for new episode
         env.reset()
         for agent in env.agent_iter():
@@ -48,7 +49,7 @@ for env in envs:
 
             observation, reward, termination, truncation, info = env.last()
             
-            greedyPolicy = greedy.GreedyPolicy(env)
+            greedyPolicy = greedy.GreedyPolicy(env, strategy_index)
 
             #action = env.action_space(agent).sample()
             action = greedyPolicy(observation,agent) #!!! -> esta linha + ficheiro greedy
@@ -57,6 +58,8 @@ for env in envs:
                 env.step(None)
             else:
                 env.step(action)
+
+    strategy_index += 1
 
 # Results is a dictionary: key=case, value=results being plotted
 results = {}
@@ -67,13 +70,13 @@ for case in OUTPUT_FILES:
     all_frames = []
     for episode in f.readlines():
         resultJSON = json.loads(episode)
-        all_frames += [resultJSON["frames"]]
+        all_frames += [resultJSON["total_kills"]]
 
     all_frames = np.array(all_frames)
-    results[case[:len(case)-4]] = all_frames
+    results[case] = all_frames
 
 graph_utils.compare_results(
     results,
-    title="Comparion between number of frames survived",
+    title="Comparion between number of total_kills",
     colors=COLORS
 )

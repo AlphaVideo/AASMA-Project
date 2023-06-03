@@ -1,9 +1,9 @@
 # game settings
 SPAWN_RATE=5
-NUM_ARCHERS=2
+NUM_ARCHERS=1
 NUM_KNIGHTS=2
 MAX_ZOMBIES=16
-MAX_ARROWS=10
+MAX_ARROWS=5
 MAX_CYCLES=900
 
 STRATEGY_LIST=["greedy","social_conventions","roles"]
