@@ -12,8 +12,10 @@ import math
 from src import constants as const
 
 class GreedyPolicy:
-    def __init__(self, env):
+    def __init__(self, env, strategy=const.STRATEGY):
         self.env = env
+        self.strategy = strategy
+
         #self.agent_id = agent_id
         #self.agent = self.env.agents[self.agent_id]
 
@@ -260,12 +262,12 @@ class GreedyPolicy:
         agent_id = agent[7:]
 
         #greedy
-        if const.STRATEGY == 0 and "archer" in agent:
+        if self.strategy == 0 and "archer" in agent:
             target = self.zombieNearBottom(observation)
-        if const.STRATEGY == 0 and "knight" in agent:
+        if self.strategy == 0 and "knight" in agent:
             target = self.closestZombie(observation)
         #socia conventions
-        elif const.STRATEGY == 1:  
+        elif self.strategy == 1:  
             target = self.socialConventions(observation,agent)
         #roles
         else:
