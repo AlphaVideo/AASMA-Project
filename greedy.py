@@ -114,13 +114,17 @@ class GreedyPolicy:
             #rotate left
             return 2     
     
-    def knightAction(self, position, closest):
+    def knightAction(self, position, closest, orderedZombies):
 
 
         knight_direction_v = self.unit_vector(np.array([position[3], position[4]]))
         zombie_relational_v = self.unit_vector(np.array([closest[1], closest[2]]))
 
         vector_mat_det = knight_direction_v[0]*zombie_relational_v[1] - knight_direction_v[1]*zombie_relational_v[0]
+
+        for zombie in orderedZombies:
+            if zombie[0] < const.KNIGHT_ATTACK_RADIUS:
+                return 4
 
         #if inside radius, attack
         if closest[0] < const.KNIGHT_ATTACK_RADIUS:
@@ -223,7 +227,8 @@ class GreedyPolicy:
                 action = 5
             else:
                 target = self.socialConventions(observation,agent)
-                action = self.knightAction(position, target)
+                orderedZombies = self.orderZombies(observation)
+                action = self.knightAction(position, target, orderedZombies)
     
         return action
 
