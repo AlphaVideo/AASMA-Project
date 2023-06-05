@@ -156,7 +156,8 @@ for i in range(N_CASES):
 
 clock = pygame.time.Clock()
 
-for env, strategy_idx in enumerate(envs): 
+strategy_idx = 0
+for env in envs: 
     for i in range(N_EPISODES):
         # Reset environment for new episode
         env.reset()
@@ -174,6 +175,7 @@ for env, strategy_idx in enumerate(envs):
                 env.step(None)
             else:
                 env.step(action)
+    strategy_idx += 1
 
 # Results is a dictionary: key=case, value=results being plotted
 results = {}
