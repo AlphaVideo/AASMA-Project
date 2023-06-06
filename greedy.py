@@ -262,9 +262,7 @@ class GreedyPolicy:
         agent_id = agent[7:]
 
         #greedy
-        if self.strategy == 0 and "archer" in agent:
-            target = self.zombieNearBottom(observation)
-        if self.strategy == 0 and "knight" in agent:
+        if self.strategy == 0:
             target = self.closestZombie(observation)
         #socia conventions
         elif self.strategy == 1:  
