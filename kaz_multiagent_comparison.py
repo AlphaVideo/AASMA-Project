@@ -167,8 +167,7 @@ for strategy_idx, env in enumerate(envs):
             
             greedyPolicy = greedy.GreedyPolicy(env, strategy_idx)
 
-            #action = env.action_space(agent).sample()
-            action = greedyPolicy(observation,agent) #!!! -> esta linha + ficheiro greedy
+            action = greedyPolicy(observation,agent)
 
             if termination or truncation:
                 env.step(None)
