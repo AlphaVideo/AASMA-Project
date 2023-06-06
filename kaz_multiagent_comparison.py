@@ -15,7 +15,7 @@ import greedy
 from src import constants as const
 
 N_CASES=len(const.STRATEGY_LIST)
-N_EPISODES=3
+N_EPISODES=10
 N_GRAPHS=3
 OUTPUT_FILES=[const.STRATEGY_LIST[0]+".txt", const.STRATEGY_LIST[1]+".txt", const.STRATEGY_LIST[2]+".txt"]
 
@@ -156,8 +156,7 @@ for i in range(N_CASES):
 
 clock = pygame.time.Clock()
 
-strategy_idx = 0
-for env in envs: 
+for strategy_idx, env in enumerate(envs): 
     for i in range(N_EPISODES):
         # Reset environment for new episode
         env.reset()
@@ -175,7 +174,6 @@ for env in envs:
                 env.step(None)
             else:
                 env.step(action)
-    strategy_idx += 1
 
 # Results is a dictionary: key=case, value=results being plotted
 results = {}
