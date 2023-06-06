@@ -16,6 +16,10 @@ class GreedyPolicy:
         self.env = env
         self.strategy = strategy
 
+        #self.agent_id = agent_id
+        #self.agent = self.env.agents[self.agent_id]
+
+        #!!!
         self.num_archers=const.NUM_ARCHERS
         self.num_knights=const.NUM_KNIGHTS
         self.max_arrows =const.MAX_ARROWS
@@ -71,10 +75,6 @@ class GreedyPolicy:
         #True if vectors are within a margin
         return abs(v1[0] - v2[0]) <= const.ANGLE_MARGIN and abs(v1[1] - v2[1]) <= const.ANGLE_MARGIN
     
-    def is_in_attack_radius(self, v1, v2):
-        #True if vectors are within a margin
-        return abs(v1[0] - v2[0]) <= 0.5 and abs(v1[1] - v2[1]) <= 0.5
-    
     def move_agent_to_right(self, v1, v2):
         return abs(v1[1] - v2[0]) <= const.ARCHER_POSTION_RADIUS and abs(v1[2] - v2[1]) <= const.ARCHER_POSTION_RADIUS
 
@@ -123,20 +123,21 @@ class GreedyPolicy:
             #rotate left
             return 2     
     
-    def knightAction(self, position, target, closestZombie):
+    def knightAction(self, position, target, orderedZombies):
 
-
-        # if passes by zombie, attacks
-        if closestZombie[0] < const.KNIGHT_ATTACK_RADIUS+0.02: target = closestZombie
 
         knight_direction_v = self.unit_vector(np.array([position[3], position[4]]))
         zombie_relational_v = self.unit_vector(np.array([target[1], target[2]]))
 
         vector_mat_det = knight_direction_v[0]*zombie_relational_v[1] - knight_direction_v[1]*zombie_relational_v[0]
 
+        for zombie in orderedZombies:
+            if zombie[0] < const.KNIGHT_ATTACK_RADIUS:
+                return 4
+
         #if inside radius, attack
-        if target[0] < const.KNIGHT_ATTACK_RADIUS+0.01 and self.is_in_attack_radius(knight_direction_v, zombie_relational_v):
-           return 4
+        if target[0] < const.KNIGHT_ATTACK_RADIUS:
+            return 4
         elif (self.vectors_near_collinear(knight_direction_v, zombie_relational_v)):
             #get closer
             return 0
@@ -152,6 +153,8 @@ class GreedyPolicy:
     def agentPriority(self, observation, agent):
         # priority: archer 1 > ... > archer n > knight 1 > ... > knight m
 
+        #test = -1
+
         agent_id = int(agent[7:])
         if "archer" in agent: agent_id += self.num_knights
 
@@ -159,15 +162,23 @@ class GreedyPolicy:
         knight_endIndex = 1 + self.num_archers + self.num_knights
         archer_endIndex = 1 + self.num_archers
         agents = list(observation[archer_endIndex:knight_endIndex]) + list(observation[1:archer_endIndex])
+        #agents_endIndex = 1 + self.num_archers + self.num_knights
+        #agents = observation[1:agents_endIndex]
 
         priority = agent_id
         
         #check if there are dead agents and ajust priorities
         for i in range(len(agents)): 
             if i >= agent_id: 
+                #if(test==1): print("break: i= ",i)
                 break
             elif not agents[i].any():
                 priority -= 1
+                #test = 1
+                #print("i:",i," agent_id: ", agent_id, "new_priority: ", priority)
+                
+
+        #if test == 1: print(agents,"\n-------------------------------")
 
         return priority
 
@@ -182,7 +193,10 @@ class GreedyPolicy:
         # filter dead zombies
         zombies = list(filter(lambda z: z.any(), zombies))
 
-        # sort them by absolute y
+        # sort them by relative y !!
+        #zombies.sort(key=self.orderFunc)
+
+        # sort them by absolute y (!! i think)
         agent_pos = observation[0]
         zombies.sort(key=lambda z: agent_pos[2] - z[2])
 
@@ -218,9 +232,9 @@ class GreedyPolicy:
         return closest
 
     def roles(self,observation):
-        # 1. Finds the 4 closest zombies to the bottom
-        # 2. See distance of each agent to each of those zombies
-        # 3. Give appropriate zombie-to-kill to each agent
+        # 1.olhar para os 4 zombies mais proximos
+        # 2. ver a distancia de cada agente a cada zombie
+        # 3. atribuir role ao mais proximo
 
         orderedZombies = self.orderZombies(observation)
         agent_pos = observation[0]
@@ -265,7 +279,8 @@ class GreedyPolicy:
             action = self.archerAction(position, target,agent_id)
 
         elif ("knight" in agent):
-            action = self.knightAction(position, target, self.closestZombie(observation))
+            orderedZombies = self.orderZombies(observation)
+            action = self.knightAction(position, target, orderedZombies)
 
         return action
 
