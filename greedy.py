@@ -19,7 +19,6 @@ class GreedyPolicy:
         #self.agent_id = agent_id
         #self.agent = self.env.agents[self.agent_id]
 
-        #!!!
         self.num_archers=const.NUM_ARCHERS
         self.num_knights=const.NUM_KNIGHTS
         self.max_arrows =const.MAX_ARROWS
@@ -75,6 +74,10 @@ class GreedyPolicy:
         #True if vectors are within a margin
         return abs(v1[0] - v2[0]) <= const.ANGLE_MARGIN and abs(v1[1] - v2[1]) <= const.ANGLE_MARGIN
     
+    def is_in_attack_radius(self, v1, v2):
+        #True if vectors are within a margin
+        return abs(v1[0] - v2[0]) <= 0.5 and abs(v1[1] - v2[1]) <= 0.5
+    
     def move_agent_to_right(self, v1, v2):
         return abs(v1[1] - v2[0]) <= const.ARCHER_POSTION_RADIUS and abs(v1[2] - v2[1]) <= const.ARCHER_POSTION_RADIUS
 
@@ -123,21 +126,30 @@ class GreedyPolicy:
             #rotate left
             return 2     
     
-    def knightAction(self, position, target, orderedZombies):
+    def knightAction(self, position, target, closestZombie):
 
+
+        # if passes by zombie, attacks
+        if closestZombie[0] < const.KNIGHT_ATTACK_RADIUS+0.02: target = closestZombie
+        #if closestZombie[0] < const.KNIGHT_ATTACK_RADIUS:return 4
 
         knight_direction_v = self.unit_vector(np.array([position[3], position[4]]))
         zombie_relational_v = self.unit_vector(np.array([target[1], target[2]]))
 
         vector_mat_det = knight_direction_v[0]*zombie_relational_v[1] - knight_direction_v[1]*zombie_relational_v[0]
 
-        for zombie in orderedZombies:
-            if zombie[0] < const.KNIGHT_ATTACK_RADIUS:
-                return 4
+        # for zombie in orderedZombies:
+        #     if zombie[0] < const.KNIGHT_ATTACK_RADIUS:
+        #         return 4
+            
+
+        #teste !
+        #if knight_direction_v[1] > 0 and target[0] < 0.04: return 4
+        #elif knight_direction_v[1] <= 0 and target[0] < 0.05: return 4
 
         #if inside radius, attack
-        if target[0] < const.KNIGHT_ATTACK_RADIUS:
-            return 4
+        if target[0] < const.KNIGHT_ATTACK_RADIUS+0.01 and self.is_in_attack_radius(knight_direction_v, zombie_relational_v):
+           return 4
         elif (self.vectors_near_collinear(knight_direction_v, zombie_relational_v)):
             #get closer
             return 0
@@ -278,11 +290,14 @@ class GreedyPolicy:
 
         #get action
         if ("archer" in agent):
+            #! teste
+            #danger_Zombie = self.orderZombies(observation)[0]
+            #if(position[2] - danger_Zombie[2] > const.SCREEN_HEIGHT-5): target = danger_Zombie
             action = self.archerAction(position, target,agent_id)
 
         elif ("knight" in agent):
-            orderedZombies = self.orderZombies(observation)
-            action = self.knightAction(position, target, orderedZombies)
+            #orderedZombies = self.orderZombies(observation)
+            action = self.knightAction(position, target, self.closestZombie(observation))
 
         return action
 
